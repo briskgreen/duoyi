@@ -18,11 +18,11 @@ void tray_create(GtkWidget *widget)
 
 	menu=gtk_menu_new();
 
-	show=gtk_menu_item_new_with_mnemonic(_("_Show"));
+	show=gtk_menu_item_new_with_mnemonic(TO_UTF8("显示(_S)"));
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu),show);
 	gtk_widget_set_sensitive(show,FALSE);
 
-	hide=gtk_menu_item_new_with_mnemonic(_("H_ide"));
+	hide=gtk_menu_item_new_with_mnemonic(TO_UTF8("隐藏(_i)"));
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu),hide);
 
 	show_data=malloc(sizeof(TrayData));
