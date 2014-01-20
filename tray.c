@@ -7,14 +7,23 @@ void tray_create(GtkWidget *widget)
 	GtkWidget *show;
 	GtkWidget *hide;
 	GtkWidget *quit;
+	GtkWidget *item;
 	TrayData *show_data;
 	TrayData *hide_data;
+	Tray *data;
+
+	show_data=malloc(sizeof(TrayData));
+	hide_data=malloc(sizeof(TrayData));
+	show_data->widget=hide_data->widget=widget;
+	data=malloc(sizeof(Tray));
+	data->show=show_data;
+	data->hide=hide_data;
 
 	tray=gtk_status_icon_new_from_file("img/64x64/yi.png");
 	gtk_status_icon_set_tooltip_text(tray,TO_UTF8("多译"));
 	gtk_status_icon_set_visible(tray,TRUE);
 	g_signal_connect(G_OBJECT(tray),"activate",
-			G_CALLBACK(tray_on_clicked),widget);
+			G_CALLBACK(tray_on_clicked_with_tray),data);
 
 	menu=gtk_menu_new();
 
@@ -25,9 +34,6 @@ void tray_create(GtkWidget *widget)
 	hide=gtk_menu_item_new_with_mnemonic(TO_UTF8("隐藏(_i)"));
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu),hide);
 
-	show_data=malloc(sizeof(TrayData));
-	hide_data=malloc(sizeof(TrayData));
-	show_data->widget=hide_data->widget=widget;
 	show_data->item=hide;
 	hide_data->item=show;
 
@@ -35,6 +41,27 @@ void tray_create(GtkWidget *widget)
 			G_CALLBACK(tray_on_clicked),show_data);
 	g_signal_connect(G_OBJECT(hide),"activate",
 			G_CALLBACK(duoyi_hide_window),hide_data);
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu),
+			gtk_separator_menu_item_new());
+
+	item=gtk_image_menu_item_new_from_stock(GTK_STOCK_PREFERENCES,NULL);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu),item);
+	g_signal_connect(G_OBJECT(item),"activate",
+			G_CALLBACK(duoyi_preferences),NULL);
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu),
+			gtk_separator_menu_item_new());
+
+	item=gtk_image_menu_item_new_from_stock(GTK_STOCK_HELP,NULL);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu),item);
+	g_signal_connect(G_OBJECT(item),"activate",
+			G_CALLBACK(duoyi_help_dialog),NULL);
+
+	item=gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT,NULL);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu),item);
+	g_signal_connect(G_OBJECT(item),"activate",
+			G_CALLBACK(duoyi_about_dialog),NULL);
 
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu),
 			gtk_separator_menu_item_new());
@@ -49,6 +76,25 @@ void tray_create(GtkWidget *widget)
 			G_CALLBACK(tray_on_menu),menu);
 	g_signal_connect(G_OBJECT(widget),"window-state-event",
 			G_CALLBACK(duoyi_hide_to_tray),tray);
+}
+
+void tray_on_clicked_with_tray(GtkWidget *widget,Tray *data)
+{
+	if(!gtk_widget_get_visible(GTK_WIDGET(data->show->widget)))
+	{
+		gtk_widget_show_all(GTK_WIDGET(data->show->widget));
+		gtk_window_present(GTK_WINDOW(data->show->widget));
+
+		gtk_widget_set_sensitive(GTK_WIDGET(data->show->item),TRUE);
+		gtk_widget_set_sensitive(GTK_WIDGET(data->hide->item),FALSE);
+	}
+	else
+	{
+		gtk_widget_hide(GTK_WIDGET(data->show->widget));
+
+		gtk_widget_set_sensitive(GTK_WIDGET(data->hide->item),TRUE);
+		gtk_widget_set_sensitive(GTK_WIDGET(data->show->item),FALSE);
+	}
 }
 
 void tray_on_clicked(GtkWidget *widget,TrayData *data)
