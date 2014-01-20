@@ -1,9 +1,7 @@
 #include "tray.h"
 
 void create_menu(GtkWidget *win,GtkWidget *vbox,GtkWidget *reader);
-void add_dic_selection(GtkWidget *win,GtkWidget *hbox);
-void add_image_button(GtkWidget *vbox,char *name,char *filename,
-		callback func,gpointer data);
+void add_dic_selection(GtkWidget *win,GtkWidget *hbox,SelectionData *data);
 
 int main(int argc,char **argv)
 {
@@ -12,6 +10,7 @@ int main(int argc,char **argv)
 	GtkWidget *hbox;
 	GtkWidget *reader;
 	GtkWidget *displayer;
+	SelectionData select_data;
 
 	gtk_init(&argc,&argv);
 
@@ -32,7 +31,7 @@ int main(int argc,char **argv)
 	create_menu(win,vbox,reader);
 
 	gtk_box_pack_start(GTK_BOX(vbox),hbox,FALSE,FALSE,10);
-	add_dic_selection(win,hbox);
+	add_dic_selection(win,hbox,&select_data);
 
 	gtk_widget_show_all(win);
 	gtk_main();
@@ -68,6 +67,15 @@ void create_menu(GtkWidget *win,GtkWidget *vbox,GtkWidget *reader)
 			G_CALLBACK(duoyi_quit),NULL);
 
 	menu=gtk_menu_new();
+	item=gtk_menu_item_new_with_mnemonic("编辑(_E)");
+	gtk_menu_shell_append(GTK_MENU_SHELL(bar),item);
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item),menu);
+	item=gtk_image_menu_item_new_from_stock(GTK_STOCK_PREFERENCES,accel_group);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu),item);
+	g_signal_connect(G_OBJECT(item),"activate",
+			G_CALLBACK(duoyi_preferences),NULL);
+
+	menu=gtk_menu_new();
 	item=gtk_menu_item_new_with_mnemonic("帮助(_H)");
 	gtk_menu_shell_append(GTK_MENU_SHELL(bar),item);
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item),menu);
@@ -76,30 +84,25 @@ void create_menu(GtkWidget *win,GtkWidget *vbox,GtkWidget *reader)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu),item);
 	g_signal_connect(G_OBJECT(item),"activate",
 			G_CALLBACK(duoyi_about_dialog),NULL);
+	item=gtk_image_menu_item_new_from_stock(GTK_STOCK_HELP,accel_group);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu),item);
+	g_signal_connect(G_OBJECT(item),"activate",
+			G_CALLBACK(duoyi_help_dialog),NULL);
 }
 
-void add_image_button(GtkWidget *vbox,char *name,char *filename,
-		callback func,gpointer data)
-{
-	GtkWidget *button;
-	GtkWidget *image;
-
-	image=gtk_image_new_from_file(filename);
-	button=gtk_toggle_button_new();
-
-	gtk_button_set_image(GTK_BUTTON(button),image);
-	gtk_button_set_image_position(GTK_BUTTON(button),GTK_POS_TOP);
-	gtk_button_set_label(GTK_BUTTON(button),name);
-	gtk_box_pack_start(GTK_BOX(vbox),button,FALSE,FALSE,0);
-
-	g_signal_connect(G_OBJECT(button),"toggled",
-			G_CALLBACK(func),data);
-}
-
-void add_dic_selection(GtkWidget *win,GtkWidget *hbox)
+void add_dic_selection(GtkWidget *win,GtkWidget *hbox,SelectionData *data)
 {
 	GtkWidget *vbox;
 	GtkWidget *frame;
+	GtkWidget *button;
+	GtkWidget *image;
+	GSList *group;
+
+	int i;
+	char *name[]={"百度翻译","必应翻译","金山词霸","有道翻译"};
+	char *path[]={"img/baidu.png","img/bing.png","img/king.png","img/youdao.png"};
+	callback func[]={duoyi_baidu_select,duoyi_bing_select,
+	duoyi_king_select,duoyi_youdao_select};
 
 	frame=gtk_frame_new(TO_UTF8("选择网络词典"));
 	gtk_box_pack_start(GTK_BOX(hbox),frame,FALSE,FALSE,5);
@@ -107,12 +110,26 @@ void add_dic_selection(GtkWidget *win,GtkWidget *hbox)
 	gtk_container_add(GTK_CONTAINER(frame),vbox);
 	gtk_container_set_border_width(GTK_CONTAINER(vbox),0x10);
 
-	add_image_button(vbox,"百度翻译","img/baidu.png",
-		duoyi_baidu_select,NULL);
-	add_image_button(vbox,"必应翻译","img/bing.png",
-		duoyi_bing_select,NULL);
-	add_image_button(vbox,"金山词霸","img/king.png",
-		duoyi_king_select,NULL);
-	add_image_button(vbox,"有道翻译","img/youdao.png",
-		duoyi_youdao_select,NULL);
+	button=gtk_radio_button_new(NULL);
+	image=gtk_image_new_from_file(path[0]);
+	gtk_button_set_image(GTK_BUTTON(button),image);
+	gtk_button_set_label(GTK_BUTTON(button),name[0]);
+	gtk_button_set_image_position(GTK_BUTTON(button),GTK_POS_TOP);
+	gtk_box_pack_start(GTK_BOX(vbox),button,FALSE,FALSE,0);
+
+	g_signal_connect(G_OBJECT(button),"pressed",
+				G_CALLBACK(func[0]),data);
+	for(i=1;i != 4;++i)
+	{
+		group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(button));
+		image=gtk_image_new_from_file(path[i]);
+		button=gtk_radio_button_new(group);
+		gtk_button_set_image(GTK_BUTTON(button),image);
+		gtk_button_set_label(GTK_BUTTON(button),TO_UTF8(name[i]));
+		gtk_button_set_image_position(GTK_BUTTON(button),GTK_POS_TOP);
+
+		gtk_box_pack_start(GTK_BOX(vbox),button,FALSE,FALSE,0);
+		g_signal_connect(G_OBJECT(button),"pressed",
+				G_CALLBACK(func[i]),data);
+	}
 }

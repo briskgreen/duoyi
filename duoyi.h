@@ -17,6 +17,11 @@ typedef struct
 	GtkWidget *item;
 }TrayData;
 
+typedef struct
+{
+	GtkWidget *select[4];
+}SelectionData;
+
 typedef void (*callback)(GtkWidget *widget,gpointer data);
 
 void duoyi_quit(GtkWidget *widget,gpointer data);
@@ -28,7 +33,11 @@ void duoyi_hide_window(GtkWidget *widget,TrayData *data);
 
 void duoyi_read_from_file(GtkWidget *widget,gpointer data);
 
+void duoyi_preferences(GtkWidget *widget,gpointer data);
+
 void duoyi_about_dialog(GtkWidget *widget,gpointer data);
+
+void duoyi_help_dialog(GtkWidget *widget,gpointer data);
 
 void duoyi_baidu_select(GtkWidget *widget,gpointer data);
 
