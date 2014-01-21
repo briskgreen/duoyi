@@ -20,6 +20,9 @@ void duoyi_hide_window(GtkWidget *widget,TrayData *data)
 	gtk_widget_set_sensitive(data->item,TRUE);
 }
 
+void duoyi_combox_select(GtkWidget *widget,gpointer dat)
+{}
+
 void duoyi_read_from_file(GtkWidget *widget,gpointer data)
 {
 }

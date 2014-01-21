@@ -1,6 +1,7 @@
 #include "tray.h"
 
 void create_menu(GtkWidget *win,GtkWidget *vbox,GtkWidget *reader);
+GtkWidget *create_combox(GtkWidget *hbox,char *label);
 void add_dic_selection(GtkWidget *win,GtkWidget *hbox,SelectionData *data);
 
 int main(int argc,char **argv)
@@ -8,8 +9,13 @@ int main(int argc,char **argv)
 	GtkWidget *win;
 	GtkWidget *vbox;
 	GtkWidget *hbox;
+	GtkWidget *scrolled;
 	GtkWidget *reader;
 	GtkWidget *displayer;
+	GtkWidget *button;
+	GtkWidget *frame;
+	GtkWidget *from;
+	GtkWidget *to;
 	SelectionData select_data;
 
 	gtk_init(&argc,&argv);
@@ -18,6 +24,7 @@ int main(int argc,char **argv)
 	gtk_window_set_title(GTK_WINDOW(win),TO_UTF8("多译"));
 	gtk_window_set_position(GTK_WINDOW(win),GTK_WIN_POS_CENTER);
 	gtk_window_set_icon_from_file(GTK_WINDOW(win),"img/64x64/yi.png",NULL);
+	gtk_window_set_resizable(GTK_WINDOW(win),FALSE); 
 	g_signal_connect(G_OBJECT(win),"delete-event",
 			G_CALLBACK(duoyi_quit),NULL);
 
@@ -30,8 +37,61 @@ int main(int argc,char **argv)
 	displayer=gtk_text_view_new();
 	create_menu(win,vbox,reader);
 
-	gtk_box_pack_start(GTK_BOX(vbox),hbox,FALSE,FALSE,10);
+	gtk_box_pack_start(GTK_BOX(vbox),hbox,FALSE,FALSE,0);
 	add_dic_selection(win,hbox,&select_data);
+
+	//from=create_combox(hbox,"从:");
+	//to=create_combox(hbox,"翻译到:");
+
+	vbox=gtk_box_new(GTK_ORIENTATION_VERTICAL,0);
+	gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE,FALSE,0);
+	hbox=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,0);
+	gtk_box_pack_start(GTK_BOX(vbox),hbox,FALSE,FALSE,0);
+	from=create_combox(hbox,"从:");
+	to=create_combox(hbox,"翻译到:");
+
+	gtk_box_pack_start(GTK_BOX(vbox),
+			gtk_separator_new(GTK_ORIENTATION_HORIZONTAL),
+			FALSE,FALSE,5);
+
+	scrolled=gtk_scrolled_window_new(NULL,NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
+			GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC);
+	//displayer=gtk_text_view_new();
+	gtk_widget_set_size_request(scrolled,0x260,0x95);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(displayer),FALSE);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(displayer),GTK_WRAP_CHAR);
+	gtk_container_add(GTK_CONTAINER(scrolled),displayer);
+	frame=gtk_frame_new(TO_UTF8("翻译结果"));
+	gtk_container_add(GTK_CONTAINER(frame),scrolled);
+	gtk_box_pack_start(GTK_BOX(vbox),frame,FALSE,FALSE,0);
+	gtk_container_set_border_width(GTK_CONTAINER(scrolled),0x5);
+
+	gtk_box_pack_start(GTK_BOX(vbox),
+			gtk_separator_new(GTK_ORIENTATION_HORIZONTAL),
+			FALSE,FALSE,10);
+
+	scrolled=gtk_scrolled_window_new(NULL,NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
+			GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC);
+	gtk_widget_set_size_request(scrolled,0x260,0x60);
+	//reader=gtk_text_view_new();
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(reader),GTK_WRAP_CHAR);
+	gtk_container_add(GTK_CONTAINER(scrolled),reader);
+	frame=gtk_frame_new(TO_UTF8("输入"));
+	gtk_container_add(GTK_CONTAINER(frame),scrolled);
+	gtk_box_pack_start(GTK_BOX(vbox),frame,FALSE,FALSE,0);
+
+	gtk_container_set_border_width(GTK_CONTAINER(scrolled),0x5);
+	gtk_container_set_border_width(GTK_CONTAINER(vbox),0x10);
+	gtk_box_pack_start(GTK_BOX(vbox),
+			gtk_separator_new(GTK_ORIENTATION_HORIZONTAL),
+			FALSE,FALSE,10);
+
+	hbox=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,0);
+	gtk_box_pack_start(GTK_BOX(vbox),hbox,TRUE,TRUE,0);
+	button=gtk_button_new_with_label(TO_UTF8("翻译"));
+	gtk_box_pack_end(GTK_BOX(hbox),button,TRUE,TRUE,80);
 
 	gtk_widget_show_all(win);
 	gtk_main();
@@ -88,6 +148,22 @@ void create_menu(GtkWidget *win,GtkWidget *vbox,GtkWidget *reader)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu),item);
 	g_signal_connect(G_OBJECT(item),"activate",
 			G_CALLBACK(duoyi_help_dialog),NULL);
+}
+
+GtkWidget *create_combox(GtkWidget *hbox,char *label)
+{
+	GtkWidget *box;
+	GtkWidget *l;
+
+	box=gtk_combo_box_text_new();
+	l=gtk_label_new(TO_UTF8(label));
+	gtk_box_pack_start(GTK_BOX(hbox),l,FALSE,FALSE,0);
+	gtk_box_pack_start(GTK_BOX(hbox),box,TRUE,TRUE,10);
+
+	g_signal_connect(G_OBJECT(box),"changed",
+			G_CALLBACK(duoyi_combox_select),NULL);
+
+	return box;
 }
 
 void add_dic_selection(GtkWidget *win,GtkWidget *hbox,SelectionData *data)
