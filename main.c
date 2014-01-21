@@ -90,8 +90,21 @@ int main(int argc,char **argv)
 
 	hbox=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,0);
 	gtk_box_pack_start(GTK_BOX(vbox),hbox,TRUE,TRUE,0);
+
+	button=gtk_button_new_with_label(TO_UTF8("清空"));
+	gtk_box_pack_end(GTK_BOX(hbox),button,FALSE,FALSE,10);
+	g_signal_connect(G_OBJECT(button),"clicked",
+			G_CALLBACK(duoyi_reader_cleanup),reader);
+
+	button=gtk_button_new_with_label(TO_UTF8("从文件加载"));
+	gtk_box_pack_end(GTK_BOX(hbox),button,FALSE,FALSE,10);
+	g_signal_connect(G_OBJECT(button),"clicked",
+			G_CALLBACK(duoyi_read_from_file),reader);
+
 	button=gtk_button_new_with_label(TO_UTF8("翻译"));
 	gtk_box_pack_end(GTK_BOX(hbox),button,TRUE,TRUE,80);
+	g_signal_connect(G_OBJECT(button),"clicked",
+			G_CALLBACK(duoyi_translate),NULL);
 
 	gtk_widget_show_all(win);
 	gtk_main();

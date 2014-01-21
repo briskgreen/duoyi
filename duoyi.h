@@ -5,6 +5,10 @@
 #include <locale.h>
 #include <libintl.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
 #define _(string) gettext(string)
 #define N_(string) string
@@ -48,5 +52,11 @@ void duoyi_bing_select(GtkWidget *widget,gpointer data);
 void duoyi_king_select(GtkWidget *widget,gpointer data);
 
 void duoyi_youdao_select(GtkWidget *widget,gpointer data);
+
+void duoyi_reader_cleanup(GtkWidget *widget,gpointer data);
+
+void duoyi_translate(GtkWidget *widget,gpointer data);
+
+void duoyi_error_msgbox(char *msg);
 
 #endif
