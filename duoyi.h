@@ -9,11 +9,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-
-#define _(string) gettext(string)
-#define N_(string) string
-
-#define TO_UTF8(str) g_locale_to_utf8(str,-1,NULL,NULL,NULL)
+#include "config.h"
 
 typedef struct
 {
@@ -23,8 +19,20 @@ typedef struct
 
 typedef struct
 {
-	GtkWidget *select[4];
+	int select;
+	char *api[4];
+
+	GtkWidget *from;
+	GtkWidget *to;
 }SelectionData;
+
+typedef struct
+{
+	SelectionData *data;
+
+	GtkWidget *reader;
+	GtkWidget *displayer;
+}TranData;
 
 typedef void (*callback)(GtkWidget *widget,gpointer data);
 

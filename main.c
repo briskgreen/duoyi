@@ -2,6 +2,8 @@
 
 void create_menu(GtkWidget *win,GtkWidget *vbox,GtkWidget *reader);
 GtkWidget *create_combox(GtkWidget *hbox,char *label);
+void init_select_data(SelectionData *select_data,GtkWidget *from,
+		GtkWidget *to,DuoYiData *duoyi_data);
 void add_dic_selection(GtkWidget *win,GtkWidget *hbox,SelectionData *data);
 
 int main(int argc,char **argv)
@@ -16,12 +18,18 @@ int main(int argc,char **argv)
 	GtkWidget *frame;
 	GtkWidget *from;
 	GtkWidget *to;
+	PangoFontDescription *font_name;
 	SelectionData select_data;
+	DuoYiData duoyi_data;
+	TranData tran_data;
 
+	setlocale(LC_ALL,"");
+	setenv("LANG","zh_CN.UTF-8",1);
+	duoyi_read_config(&duoyi_data);
 	gtk_init(&argc,&argv);
 
 	win=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(win),TO_UTF8("多译"));
+	gtk_window_set_title(GTK_WINDOW(win),"多译");
 	gtk_window_set_position(GTK_WINDOW(win),GTK_WIN_POS_CENTER);
 	gtk_window_set_icon_from_file(GTK_WINDOW(win),"img/64x64/yi.png",NULL);
 	gtk_window_set_resizable(GTK_WINDOW(win),FALSE); 
@@ -37,7 +45,15 @@ int main(int argc,char **argv)
 	displayer=gtk_text_view_new();
 	create_menu(win,vbox,reader);
 
+	if(duoyi_data.font)
+	{
+		font_name=pango_font_description_from_string(duoyi_data.font);
+		gtk_widget_override_font(reader,font_name);
+		gtk_widget_override_font(displayer,font_name);
+	}
+
 	gtk_box_pack_start(GTK_BOX(vbox),hbox,FALSE,FALSE,0);
+	init_select_data(&select_data,from,to,&duoyi_data);
 	add_dic_selection(win,hbox,&select_data);
 
 	//from=create_combox(hbox,"从:");
@@ -49,6 +65,7 @@ int main(int argc,char **argv)
 	gtk_box_pack_start(GTK_BOX(vbox),hbox,FALSE,FALSE,0);
 	from=create_combox(hbox,"从:");
 	to=create_combox(hbox,"翻译到:");
+	//init_select_data(&select_data,from,to,&duoyi_data);
 
 	gtk_box_pack_start(GTK_BOX(vbox),
 			gtk_separator_new(GTK_ORIENTATION_HORIZONTAL),
@@ -62,7 +79,7 @@ int main(int argc,char **argv)
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(displayer),FALSE);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(displayer),GTK_WRAP_CHAR);
 	gtk_container_add(GTK_CONTAINER(scrolled),displayer);
-	frame=gtk_frame_new(TO_UTF8("翻译结果"));
+	frame=gtk_frame_new("翻译结果");
 	gtk_container_add(GTK_CONTAINER(frame),scrolled);
 	gtk_box_pack_start(GTK_BOX(vbox),frame,FALSE,FALSE,0);
 	gtk_container_set_border_width(GTK_CONTAINER(scrolled),0x5);
@@ -78,7 +95,7 @@ int main(int argc,char **argv)
 	//reader=gtk_text_view_new();
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(reader),GTK_WRAP_CHAR);
 	gtk_container_add(GTK_CONTAINER(scrolled),reader);
-	frame=gtk_frame_new(TO_UTF8("输入"));
+	frame=gtk_frame_new("输入");
 	gtk_container_add(GTK_CONTAINER(frame),scrolled);
 	gtk_box_pack_start(GTK_BOX(vbox),frame,FALSE,FALSE,0);
 
@@ -91,20 +108,24 @@ int main(int argc,char **argv)
 	hbox=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,0);
 	gtk_box_pack_start(GTK_BOX(vbox),hbox,TRUE,TRUE,0);
 
-	button=gtk_button_new_with_label(TO_UTF8("清空"));
+	button=gtk_button_new_with_label("清空");
 	gtk_box_pack_end(GTK_BOX(hbox),button,FALSE,FALSE,10);
 	g_signal_connect(G_OBJECT(button),"clicked",
 			G_CALLBACK(duoyi_reader_cleanup),reader);
 
-	button=gtk_button_new_with_label(TO_UTF8("从文件加载"));
+	button=gtk_button_new_with_label("从文件加载");
 	gtk_box_pack_end(GTK_BOX(hbox),button,FALSE,FALSE,10);
 	g_signal_connect(G_OBJECT(button),"clicked",
 			G_CALLBACK(duoyi_read_from_file),reader);
 
-	button=gtk_button_new_with_label(TO_UTF8("翻译"));
+	button=gtk_button_new_with_label("翻译");
 	gtk_box_pack_end(GTK_BOX(hbox),button,TRUE,TRUE,80);
+	
+	tran_data.data=&select_data;
+	tran_data.reader=reader;
+	tran_data.displayer=displayer;
 	g_signal_connect(G_OBJECT(button),"clicked",
-			G_CALLBACK(duoyi_translate),NULL);
+			G_CALLBACK(duoyi_translate),&tran_data);
 
 	gtk_widget_show_all(win);
 	gtk_main();
@@ -169,7 +190,7 @@ GtkWidget *create_combox(GtkWidget *hbox,char *label)
 	GtkWidget *l;
 
 	box=gtk_combo_box_text_new();
-	l=gtk_label_new(TO_UTF8(label));
+	l=gtk_label_new(label);
 	gtk_box_pack_start(GTK_BOX(hbox),l,FALSE,FALSE,0);
 	gtk_box_pack_start(GTK_BOX(hbox),box,TRUE,TRUE,10);
 
@@ -177,6 +198,19 @@ GtkWidget *create_combox(GtkWidget *hbox,char *label)
 			G_CALLBACK(duoyi_combox_select),NULL);
 
 	return box;
+}
+
+void init_select_data(SelectionData *select_data,GtkWidget *from,
+		GtkWidget *to,DuoYiData *duoyi_data)
+{
+	int i;
+
+	select_data->select=duoyi_data->dic;
+	select_data->from=from;
+	select_data->to=to;
+
+	for(i=0;i != 4;++i)
+		select_data->api[i]=duoyi_data->api[i];
 }
 
 void add_dic_selection(GtkWidget *win,GtkWidget *hbox,SelectionData *data)
@@ -193,7 +227,7 @@ void add_dic_selection(GtkWidget *win,GtkWidget *hbox,SelectionData *data)
 	callback func[]={duoyi_baidu_select,duoyi_bing_select,
 	duoyi_king_select,duoyi_youdao_select};
 
-	frame=gtk_frame_new(TO_UTF8("选择网络词典"));
+	frame=gtk_frame_new("选择网络词典");
 	gtk_box_pack_start(GTK_BOX(hbox),frame,FALSE,FALSE,5);
 	vbox=gtk_box_new(GTK_ORIENTATION_VERTICAL,10);
 	gtk_container_add(GTK_CONTAINER(frame),vbox);
@@ -208,17 +242,23 @@ void add_dic_selection(GtkWidget *win,GtkWidget *hbox,SelectionData *data)
 
 	g_signal_connect(G_OBJECT(button),"pressed",
 				G_CALLBACK(func[0]),data);
+	if(data->select == 0)
+		gtk_button_clicked(GTK_BUTTON(button));
+
 	for(i=1;i != 4;++i)
 	{
 		group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(button));
 		image=gtk_image_new_from_file(path[i]);
 		button=gtk_radio_button_new(group);
 		gtk_button_set_image(GTK_BUTTON(button),image);
-		gtk_button_set_label(GTK_BUTTON(button),TO_UTF8(name[i]));
+		gtk_button_set_label(GTK_BUTTON(button),name[i]);
 		gtk_button_set_image_position(GTK_BUTTON(button),GTK_POS_TOP);
 
 		gtk_box_pack_start(GTK_BOX(vbox),button,FALSE,FALSE,0);
 		g_signal_connect(G_OBJECT(button),"pressed",
 				G_CALLBACK(func[i]),data);
+
+		if(i == data->select)
+			gtk_button_clicked(GTK_BUTTON(button));
 	}
 }

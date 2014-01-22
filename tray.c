@@ -20,18 +20,18 @@ void tray_create(GtkWidget *widget)
 	data->hide=hide_data;
 
 	tray=gtk_status_icon_new_from_file("img/64x64/yi.png");
-	gtk_status_icon_set_tooltip_text(tray,TO_UTF8("多译"));
+	gtk_status_icon_set_tooltip_text(tray,"多译");
 	gtk_status_icon_set_visible(tray,TRUE);
 	g_signal_connect(G_OBJECT(tray),"activate",
 			G_CALLBACK(tray_on_clicked_with_tray),data);
 
 	menu=gtk_menu_new();
 
-	show=gtk_menu_item_new_with_mnemonic(TO_UTF8("显示(_S)"));
+	show=gtk_menu_item_new_with_mnemonic("显示(_S)");
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu),show);
 	gtk_widget_set_sensitive(show,FALSE);
 
-	hide=gtk_menu_item_new_with_mnemonic(TO_UTF8("隐藏(_i)"));
+	hide=gtk_menu_item_new_with_mnemonic("隐藏(_i)");
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu),hide);
 
 	show_data->item=hide;
