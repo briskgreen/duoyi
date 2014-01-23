@@ -1,5 +1,16 @@
 #include "duoyi.h"
 
+#define duoyi_if_select(msg) \
+{\
+	if(select->api[select->select] == NULL)\
+	{\
+		duoyi_error_msgbox(msg);\
+		return;\
+	}\
+}
+
+extern char *baidu_tran[];
+
 void _load_file(char *filename,gpointer data);
 
 void duoyi_quit(GtkWidget *widget,gpointer data)
@@ -43,8 +54,8 @@ void duoyi_hide_window(GtkWidget *widget,TrayData *data)
 	gtk_widget_set_sensitive(data->item,TRUE);
 }
 
-void duoyi_combox_select(GtkWidget *widget,gpointer data)
-{}
+/*void duoyi_combox_select(GtkWidget *widget,gpointer data)
+{}*/
 
 void duoyi_read_from_file(GtkWidget *widget,gpointer data)
 {
@@ -145,19 +156,64 @@ void duoyi_help_dialog(GtkWidget *widget,gpointer data)
 
 void duoyi_baidu_select(GtkWidget *widget,gpointer data)
 {
-	printf("baidu select \n");
+	SelectionData *select=(SelectionData *)data;
+	int i;
+
+	select->select=0;
+	duoyi_if_select("您没有设置百度API\n请于配置中设置相应API");
+	//gdk_threads_enter();
+	//gtk_widget_set_sensitive(select->from,TRUE);
+	//gtk_widget_set_sensitive(select->to,TRUE);
+	//gdk_threads_leave();
+
+	//gdk_threads_enter();
+	gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(select->from));
+	gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(select->to));
+	for(i=0;baidu_tran[i] != NULL;++i)
+	{
+		gtk_combo_box_text_append_text(
+				GTK_COMBO_BOX_TEXT(select->from),baidu_tran[i]);
+		gtk_combo_box_text_append_text(
+				GTK_COMBO_BOX_TEXT(select->to),baidu_tran[i]);
+	}
+	//gdk_threads_leave();
 }
 
 void duoyi_bing_select(GtkWidget *widget,gpointer data)
 {
+	SelectionData *select=(SelectionData *)data;
+	int i;
+
+	select->select=1;
+	duoyi_if_select("您没有设置必应API\n请于配置中设置相应API");
+	gtk_widget_set_sensitive(select->from,TRUE);
+	gtk_widget_set_sensitive(select->to,TRUE);
+	gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(select->from));
+	gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(select->to));
 }
 
 void duoyi_king_select(GtkWidget *widget,gpointer data)
 {
+	SelectionData *select=(SelectionData *)data;
+
+	select->select=2;
+	duoyi_if_select("您没有设置金山词霸API\n请于配置中设置相应API");
+	gtk_widget_set_sensitive(select->from,FALSE);
+	gtk_widget_set_sensitive(select->to,FALSE);
+	gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(select->from));
+	gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(select->to));
 }
 
 void duoyi_youdao_select(GtkWidget *widget,gpointer data)
 {
+	SelectionData *select=(SelectionData *)data;
+
+	select->select=3;
+	duoyi_if_select("您没有设置有道API\n请于配置中设置相应API");
+	gtk_widget_set_sensitive(select->from,FALSE);
+	gtk_widget_set_sensitive(select->to,FALSE);
+	gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(select->from));
+	gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(select->to));
 }
 
 void duoyi_translate(GtkWidget *widget,gpointer data)

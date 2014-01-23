@@ -10,6 +10,7 @@
 #include <string.h>
 #include <errno.h>
 #include "config.h"
+#include "baidu.h"
 
 typedef struct
 {
@@ -41,7 +42,7 @@ void duoyi_quit(GtkWidget *widget,gpointer data);
 void duoyi_hide_to_tray(GtkWidget *widget,GdkEventWindowState *event,
 		gpointer data);
 
-void duoyi_combox_select(GtkWidget *widget,gpointer data);
+//void duoyi_combox_select(GtkWidget *widget,gpointer data);
 
 void duoyi_hide_window(GtkWidget *widget,TrayData *data);
 

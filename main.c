@@ -26,6 +26,9 @@ int main(int argc,char **argv)
 	setlocale(LC_ALL,"");
 	setenv("LANG","zh_CN.UTF-8",1);
 	duoyi_read_config(&duoyi_data);
+	/*if(!g_thread_supported())
+		g_thread_init(NULL);
+	gdk_threads_init();*/
 	gtk_init(&argc,&argv);
 
 	win=gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -53,7 +56,8 @@ int main(int argc,char **argv)
 	}
 
 	gtk_box_pack_start(GTK_BOX(vbox),hbox,FALSE,FALSE,0);
-	init_select_data(&select_data,from,to,&duoyi_data);
+	select_data.select=duoyi_data.dic;
+	//init_select_data(&select_data,from,to,&duoyi_data);
 	add_dic_selection(win,hbox,&select_data);
 
 	//from=create_combox(hbox,"从:");
@@ -65,7 +69,7 @@ int main(int argc,char **argv)
 	gtk_box_pack_start(GTK_BOX(vbox),hbox,FALSE,FALSE,0);
 	from=create_combox(hbox,"从:");
 	to=create_combox(hbox,"翻译到:");
-	//init_select_data(&select_data,from,to,&duoyi_data);
+	init_select_data(&select_data,from,to,&duoyi_data);
 
 	gtk_box_pack_start(GTK_BOX(vbox),
 			gtk_separator_new(GTK_ORIENTATION_HORIZONTAL),
@@ -128,7 +132,25 @@ int main(int argc,char **argv)
 			G_CALLBACK(duoyi_translate),&tran_data);
 
 	gtk_widget_show_all(win);
+
+	switch(select_data.select)
+	{
+		case 0:
+			duoyi_baidu_select(NULL,&select_data);
+			break;
+		case 1:
+			duoyi_bing_select(NULL,&select_data);
+			break;
+		case 2:
+			duoyi_king_select(NULL,&select_data);
+			break;
+		case 3:
+			duoyi_youdao_select(NULL,&select_data);
+			break;
+	}
+	//gdk_threads_enter();
 	gtk_main();
+	//gdk_threads_leave();
 
 	return 0;
 }
@@ -194,8 +216,8 @@ GtkWidget *create_combox(GtkWidget *hbox,char *label)
 	gtk_box_pack_start(GTK_BOX(hbox),l,FALSE,FALSE,0);
 	gtk_box_pack_start(GTK_BOX(hbox),box,TRUE,TRUE,10);
 
-	g_signal_connect(G_OBJECT(box),"changed",
-			G_CALLBACK(duoyi_combox_select),NULL);
+	/*g_signal_connect(G_OBJECT(box),"changed",
+			G_CALLBACK(duoyi_combox_select),NULL);*/
 
 	return box;
 }
@@ -205,7 +227,7 @@ void init_select_data(SelectionData *select_data,GtkWidget *from,
 {
 	int i;
 
-	select_data->select=duoyi_data->dic;
+	//select_data->select=duoyi_data->dic;
 	select_data->from=from;
 	select_data->to=to;
 
@@ -242,8 +264,12 @@ void add_dic_selection(GtkWidget *win,GtkWidget *hbox,SelectionData *data)
 
 	g_signal_connect(G_OBJECT(button),"pressed",
 				G_CALLBACK(func[0]),data);
+	gtk_widget_add_events(button,GDK_BUTTON_PRESS_MASK);
 	if(data->select == 0)
+	{
 		gtk_button_clicked(GTK_BUTTON(button));
+		gtk_button_clicked(GTK_BUTTON(button));
+	}
 
 	for(i=1;i != 4;++i)
 	{
