@@ -11,6 +11,9 @@
 #include <errno.h>
 #include "config.h"
 #include "baidu.h"
+#include "bing.h"
+#include "king.h"
+#include "youdao.h"
 
 typedef struct
 {

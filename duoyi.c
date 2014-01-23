@@ -10,6 +10,9 @@
 }
 
 extern char *baidu_tran[];
+extern char *baidu_code[];
+extern char *bing_tran[];
+extern char *bing_code[];
 
 void _load_file(char *filename,gpointer data);
 
@@ -53,9 +56,6 @@ void duoyi_hide_window(GtkWidget *widget,TrayData *data)
 	gtk_widget_set_sensitive(widget,FALSE);
 	gtk_widget_set_sensitive(data->item,TRUE);
 }
-
-/*void duoyi_combox_select(GtkWidget *widget,gpointer data)
-{}*/
 
 void duoyi_read_from_file(GtkWidget *widget,gpointer data)
 {
@@ -152,7 +152,53 @@ void duoyi_about_dialog(GtkWidget *widget,gpointer data)
 }
 
 void duoyi_help_dialog(GtkWidget *widget,gpointer data)
-{}
+{
+	GtkWidget *dialog;
+	GtkWidget *help;
+	GtkWidget *area;
+	GtkTextBuffer *buffer;
+	GtkWidget *scrolled;
+	long len;
+	char *buf;
+	FILE *fp;
+
+	if((fp=fopen("readme","rb")) == NULL)
+		return;
+
+	fseek(fp,0L,SEEK_END);
+	len=ftell(fp);
+	rewind(fp);
+	buf=malloc(sizeof(char)*len+1);
+	fread(buf,len,1,fp);
+	buf[len]='\0';
+	fclose(fp);
+
+	dialog=gtk_dialog_new_with_buttons("帮助",NULL,GTK_DIALOG_MODAL,
+			GTK_STOCK_OK,GTK_RESPONSE_ACCEPT,NULL);
+
+	gtk_window_set_icon_from_file(GTK_WINDOW(dialog),
+			"img/64x64/help.png",NULL);
+	area=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+	help=gtk_text_view_new();
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(help),FALSE);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(help),GTK_WRAP_CHAR);
+
+	scrolled=gtk_scrolled_window_new(NULL,NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
+			GTK_POLICY_NEVER,GTK_POLICY_AUTOMATIC);
+	gtk_widget_set_size_request(scrolled,0x200,0x150);
+
+	gtk_container_add(GTK_CONTAINER(scrolled),help);
+	gtk_container_add(GTK_CONTAINER(area),scrolled);
+	buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(help));
+	
+	gtk_text_buffer_set_text(buffer,buf,-1);
+
+	gtk_widget_show_all(dialog);
+	gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+	free(buf);
+}
 
 void duoyi_baidu_select(GtkWidget *widget,gpointer data)
 {
@@ -162,8 +208,8 @@ void duoyi_baidu_select(GtkWidget *widget,gpointer data)
 	select->select=0;
 	duoyi_if_select("您没有设置百度API\n请于配置中设置相应API");
 	//gdk_threads_enter();
-	//gtk_widget_set_sensitive(select->from,TRUE);
-	//gtk_widget_set_sensitive(select->to,TRUE);
+	gtk_widget_set_sensitive(select->from,TRUE);
+	gtk_widget_set_sensitive(select->to,TRUE);
 	//gdk_threads_leave();
 
 	//gdk_threads_enter();
@@ -176,6 +222,8 @@ void duoyi_baidu_select(GtkWidget *widget,gpointer data)
 		gtk_combo_box_text_append_text(
 				GTK_COMBO_BOX_TEXT(select->to),baidu_tran[i]);
 	}
+	gtk_combo_box_set_active(GTK_COMBO_BOX(select->from),0);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(select->to),0);
 	//gdk_threads_leave();
 }
 
@@ -190,6 +238,13 @@ void duoyi_bing_select(GtkWidget *widget,gpointer data)
 	gtk_widget_set_sensitive(select->to,TRUE);
 	gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(select->from));
 	gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(select->to));
+	for(i=0;bing_tran[i] != NULL;++i)
+	{
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(select->from),bing_tran[i]);
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(select->to),bing_tran[i]);
+	}
+	gtk_combo_box_set_active(GTK_COMBO_BOX(select->from),8);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(select->to),3);
 }
 
 void duoyi_king_select(GtkWidget *widget,gpointer data)
@@ -217,7 +272,57 @@ void duoyi_youdao_select(GtkWidget *widget,gpointer data)
 }
 
 void duoyi_translate(GtkWidget *widget,gpointer data)
-{}
+{
+	TranData *tran=(TranData *)data;
+	GtkTextBuffer *reader;
+	GtkTextBuffer *displayer;
+	GtkTextIter start;
+	GtkTextIter end;
+	char *res;
+	int from;
+	int to;
+
+	reader=gtk_text_view_get_buffer(GTK_TEXT_VIEW(tran->reader));
+	gtk_text_buffer_get_bounds(reader,&start,&end);
+	displayer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(tran->displayer));
+	duoyi_reader_cleanup(NULL,tran->displayer);
+
+	switch(tran->data->select)
+	{
+		case 0:
+			res=baidu_translate(
+			baidu_code[gtk_combo_box_get_active(GTK_COMBO_BOX(tran->data->from))],
+			baidu_code[gtk_combo_box_get_active(GTK_COMBO_BOX(tran->data->to))],
+			tran->data->api[0],
+			gtk_text_buffer_get_text(reader,&start,&end,FALSE));
+
+			gtk_text_buffer_set_text(displayer,res,-1);
+			free(res);
+			break;
+		case 1:
+			res=bing_translate(
+			bing_code[gtk_combo_box_get_active(GTK_COMBO_BOX(tran->data->from))],
+			bing_code[gtk_combo_box_get_active(GTK_COMBO_BOX(tran->data->to))],
+			tran->data->api[1],
+			gtk_text_buffer_get_text(reader,&start,&end,FALSE));
+
+			gtk_text_buffer_set_text(displayer,res,-1);
+			free(res);
+			break;
+		case 2:
+			res=king_translate(tran->data->api[2],
+			gtk_text_buffer_get_text(reader,&start,&end,FALSE));
+			gtk_text_buffer_set_text(displayer,res,-1);
+			free(res);
+			break;
+		case 3:
+			res=youdao_translate(tran->data->api[3],
+			gtk_text_buffer_get_text(reader,&start,&end,FALSE));
+			gtk_text_buffer_set_text(displayer,res,-1);
+			free(res);
+			break;
+	}
+}
 
 void duoyi_reader_cleanup(GtkWidget *widget,gpointer data)
 {

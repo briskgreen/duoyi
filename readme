@@ -1,0 +1,39 @@
+多译 - 多语言网络翻译词典
+
+    本应用是使用GTK+3进行开发的多语言网编翻译词典软件，该软件中所使用翻译平台有：
+
+百度词典、必应词典、金山词霸以及有道词典。
+
+    由于本软件是基于以上各平台提供的网络翻译API接口实现的，所以本软件是一款纯网络应用，它所有的翻译结果均来自以上翻译平台，所以本应用没有词库，这意味着在使用本应用的同时你必需要有网络连接。
+
+    由于本软件所使用的接口中多数都对网络访问有所限制，所以如果出错未授权或API错误等情况请自行申请新的API Key使用。
+
+各平台访问限制如下：
+
+    百度词典:默认翻译API使用频率为每个IP 1000次/小时，支持扩容 
+    必应词典:2,000,000 字符/月
+    金山词霸:目前版本没有限制
+    有道词典:请求频率限制为每小时1000次，超过限制会被封禁。
+
+    本人在此对以上各平台API Key各提供一枚供大家使用，如有遇到限制请自行申请API Key。
+
+各API Key申请地址及方法:
+
+    百度词典:百度词典API Key的申请方法是注册成为百度开发者，然后创建一个应用，第个应用中都会有一个API Key。
+    百度开发者中心地址:developer.baidu.com
+
+    必应词典:注册使用Bing Translate API前需要有一个Bing帐户(MSN帐户即可),成功注册并订阅Bing Translate API后在"我的帐户"中复制主帐户密钥。这里有一篇文章或可供参考:briskgreen.mt4.tw/blog/linux/使用bing-translate-api做简单的多语言翻译-2
+    Bing Translate API:https://datamarket.azure.com/dataset/bing/microsofttranslator
+
+    金山词霸:open.iciba.com/?c=api 
+    有道词典:fanyi.youdao.com/openapi?path=data-mode (注意有道词典API需要keyfrom和API Key,在首选项--API中填写的方法是<keyform> <API Key>)
+
+安装:
+    编译 make
+    安装(需要root权限) make install
+    卸载(需要root权限) make uninstall
+
+联系本人：
+    如果您有更好的建议或者您发现了一些bug，请致电邮件到briskgreen@163.com
+
+                                                                 谢谢！

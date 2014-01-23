@@ -216,9 +216,6 @@ GtkWidget *create_combox(GtkWidget *hbox,char *label)
 	gtk_box_pack_start(GTK_BOX(hbox),l,FALSE,FALSE,0);
 	gtk_box_pack_start(GTK_BOX(hbox),box,TRUE,TRUE,10);
 
-	/*g_signal_connect(G_OBJECT(box),"changed",
-			G_CALLBACK(duoyi_combox_select),NULL);*/
-
 	return box;
 }
 
