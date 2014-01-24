@@ -1,15 +1,18 @@
 #include "king.h"
 #include "tool.h"
 
+void replace(char *word);
+
 char *king_translate(char *api,char *word)
 {
 	CURL *curl;
 	CURLcode code;
-	char *url;
 	char *buf;
 	char *res;
+	char *url;
 	DATA data;
 
+	replace(word);
 	url=url_encode(word);
 	buf=string_add("http://dict-co.iciba.com/api/dictionary.php?w=%s&key=%s",url,api);
 	free(url);
@@ -44,12 +47,21 @@ char *king_parser(char *data)
 	xmlChar *str;
 
 	doc=xmlParseDoc(data);
+	xmlKeepBlanksDefault(0);
 	root=xmlDocGetRootElement(doc);
 	root=root->children;
 
 	res=string_add("%s","翻译:\n\n");
 	while(root)
 	{
+		if(!xmlStrcmp(root->name,"fy"))
+		{
+			str=xmlNodeGetContent(root);
+			res=stradd(res,str);
+
+			xmlFree(str);
+		}
+
 		if(!xmlStrcmp(root->name,"pos"))
 		{
 			str=xmlNodeGetContent(root);
@@ -99,4 +111,22 @@ char *king_error(char *code)
 	snprintf(res,strlen(code)+1,"%s",code);
 
 	return res;
+}
+
+void replace(char *word)
+{
+	int i;
+
+	for(i=0;word[i];++i)
+	{
+		switch(word[i])
+		{
+			case '<':
+				word[i]='[';
+				break;
+			case '>':
+				word[i]=']';
+				break;
+		}
+	}
 }

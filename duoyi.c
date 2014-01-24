@@ -352,7 +352,8 @@ void _load_file(char *filename,gpointer data)
 {
 	GtkTextBuffer *buffer;
 	FILE *fp;
-	char buf[64]={0};
+	long len;
+	char *buf;
 
 	if((fp=fopen(filename,"rb")) == NULL)
 	{
@@ -360,14 +361,16 @@ void _load_file(char *filename,gpointer data)
 		return;
 	}
 
-	buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(data));
-	while(!feof(fp))
-	{
-		bzero(buf,sizeof(buf));
-		fread(buf,sizeof(buf)-1,1,fp);
-
-		gtk_text_buffer_insert_at_cursor(buffer,buf,-1);
-	}
-
+	fseek(fp,0L,SEEK_END);
+	len=ftell(fp);
+	rewind(fp);
+	buf=malloc(len+1);
+	fread(buf,len,1,fp);
+	buf[len]='\0';
 	fclose(fp);
+
+	buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(data));
+	gtk_text_buffer_set_text(buffer,buf,-1);
+
+	free(buf);
 }

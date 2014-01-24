@@ -8,6 +8,8 @@ char *baidu_translate(char *from,char *to,char *api,char *word);
 
 char *baidu_error(char *code);
 
+char *baidu_error_int(int code);
+
 char *baidu_parser(char *data);
 
 #endif
