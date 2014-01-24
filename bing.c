@@ -1,6 +1,7 @@
 #include "bing.h"
 #include "tool.h"
 
+/*支持翻译的语言列表*/
 char *bing_tran[]=
 {
 	"阿拉伯语","保加利亚语","加泰罗尼亚语","简体中文","繁体中文","捷克语",
@@ -11,6 +12,7 @@ char *bing_tran[]=
 	"乌克兰语","乌尔都语","越南语",NULL
 };
 
+/*对应语言代码列表*/
 char *bing_code[]=
 {
 	"ar","bg","ca","zh-CHS","zh-CHT","cs",
@@ -53,6 +55,7 @@ char *bing_translate(char *from,char *to,char *api,char *word)
 	curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE,&retcode);
 	curl_easy_cleanup(curl);
 
+	/*返回状态如果不为200则操作出错*/
 	if(retcode != 200)
 		res=bing_error(data.data);
 	else
@@ -93,6 +96,7 @@ char *bing_parser(char *data)
 	return res;
 }
 
+/*动态开辟内存，为了所有返回均可free*/
 char *bing_error(char *code)
 {
 	char *res;

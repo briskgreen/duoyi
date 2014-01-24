@@ -12,7 +12,12 @@ char *youdao_translate(char *api,char *word)
 	char yd_from[512]={0};
 	char yd_api[512]={0};
 
+	/*输入api与keyfrom
+	 * 有道词典接口需要这两个参数
+	 * 为了能够与其它词典API一样使用一行进行存储
+	 * 所以有道词典API的存储方法是keyfrom api*/
 	sscanf(api,"%s%s",yd_from,yd_api);
+	/*url转码，不然无法翻译中文*/
 	url=url_encode(word);
 	buf=string_add("http://fanyi.youdao.com/openapi.do?keyfrom=%s&key=%s&type=data&doctype=json&version=1.1&q=%s",yd_from,yd_api,url);
 	free(url);

@@ -1,12 +1,14 @@
 #include "baidu.h"
 #include "tool.h"
 
+/*支持翻译的语言列表*/
 char *baidu_tran[]=
 {
 	"自动识别","中文","英语","日语","韩语","西班牙语","法语",
 	"泰语","阿拉伯语","粤语","俄语","葡萄牙语",NULL
 };
 
+/*对应语言代码*/
 char *baidu_code[]=
 {
 	"auto","zh","en","jp","kor","spa","fra",
@@ -22,6 +24,7 @@ char *baidu_translate(char *from,char *to,char *api,char *word)
 	char *buf;
 	DATA data;
 
+	/*读取返回的数据，默认设置为NULL*/
 	data.data=NULL;
 	url=url_encode(word);
 	if(url == NULL)
@@ -211,6 +214,7 @@ char *baidu_parser(char *data)
 
 		//buf=baidu_error(json_reader_get_string_value(reader));
 		buf=json_reader_get_string_value(reader);
+		/*判断错误码是string还是int*/
 		if(buf == NULL)
 		{
 			json_reader_end_member(reader);

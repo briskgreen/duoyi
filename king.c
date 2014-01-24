@@ -12,6 +12,7 @@ char *king_translate(char *api,char *word)
 	char *url;
 	DATA data;
 
+	/*替换掉<与>字符，不然解析时会是错误的xml文件*/
 	replace(word);
 	url=url_encode(word);
 	buf=string_add("http://dict-co.iciba.com/api/dictionary.php?w=%s&key=%s",url,api);
@@ -24,10 +25,12 @@ char *king_translate(char *api,char *word)
 	curl_easy_setopt(curl,CURLOPT_WRITEDATA,&data);
 
 	code=curl_easy_perform(curl);
+	free(buf);
 
 	if(code != 0)
 		res=king_error("网络错误");
-	
+
+/*如果有返回数据，则解析*/	
 	if(data.data)
 	{
 		res=king_parser(data.data);
