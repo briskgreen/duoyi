@@ -19,7 +19,11 @@ int main(int argc,char **argv)
 
 	/*设置默认UTF-8编码*/
 	setlocale(LC_ALL,"");
+#ifdef _WIN32
+	putenv("LANG=zh_CN.UTF-8");
+#else
 	setenv("LANG","zh_CN.UTF-8");
+#endif
 	/*先读取出配置*/
 	duoyi_read_config(&data.data);
 	/*默认状态为未更改*/

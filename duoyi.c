@@ -114,11 +114,16 @@ void duoyi_read_from_file(GtkWidget *widget,gpointer data)
 void duoyi_preferences(GtkWidget *widget,gpointer data)
 {
 	/*首选项，该界面为新的程序*/
+#ifdef _WIN32
+	if(spawnl(P_NOWAIT,"preferences.exe","preferences",NULL) == -1)
+		duoyi_error_msgbox(strerror(errno));
+#else
 	if(fork() == 0)
 	{
 		if(execl("./preferences","preferences",NULL) == -1)
 			duoyi_error_msgbox(strerror(errno));
 	}
+#endif
 }
 
 void duoyi_about_dialog(GtkWidget *widget,gpointer data)

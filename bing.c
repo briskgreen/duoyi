@@ -41,6 +41,7 @@ char *bing_translate(char *from,char *to,char *api,char *word)
 
 	curl=curl_easy_init();
 	curl_easy_setopt(curl,CURLOPT_URL,buf);
+	curl_easy_setopt(curl,CURLOPT_SSL_VERIFYPEER,0);
 	curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,curl_read_to_data);
 	curl_easy_setopt(curl,CURLOPT_WRITEDATA,&data);
 	curl_easy_setopt(curl,CURLOPT_HTTPAUTH,CURLAUTH_BASIC);

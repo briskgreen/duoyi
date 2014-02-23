@@ -59,7 +59,11 @@ char *url_encode(char *str)
 
 	len=strlen(str)*3;
 	res=malloc(len+1);
+#ifdef _WIN32
+	memset(res,0,len+1);
+#else
 	bzero(res,len+1);
+#endif
 
 	for(i=0,j=0;str[i];++i,j+=3)
 		sprintf(res+j,"%%%02x",(unsigned char)str[i]);

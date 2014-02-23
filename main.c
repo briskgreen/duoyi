@@ -30,7 +30,11 @@ int main(int argc,char **argv)
 
 	/*默认使用UTF-8编码*/
 	setlocale(LC_ALL,"");
+#ifdef _WIN32
+	putenv("LANG=zh_CN.UTF-8");
+#else
 	setenv("LANG","zh_CN.UTF-8",1);
+#endif
 	/*读取配置文件，配置文件以json格式存储*/
 	duoyi_read_config(&duoyi_data);
 	/*if(!g_thread_supported())
