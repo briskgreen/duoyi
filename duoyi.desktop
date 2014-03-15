@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Internet
 Name=多译
-Icon=/usr/local/duoyi/img/64x64/duoyi.png
+Icon=/usr/local/duoyi/img/64x64/yi.png
 Exec=duoyi
 Encoding=UTF-8
 Terminal=false

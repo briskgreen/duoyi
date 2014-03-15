@@ -7,7 +7,7 @@ cp .duoyirc /usr/local/duoyi/
 cp readme /usr/local/duoyi/
 cp LICENSE /usr/local/duoyi/
 
-ln -s /usr/local/duoyi/duoyi /bin/duoyi
+ln -s /usr/local/duoyi/duoyi.sh /bin/duoyi
 
 cp duoyi.desktop /home/brisk/.local/share/applications/ 
 
