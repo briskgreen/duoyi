@@ -100,14 +100,15 @@ char *youdao_parser(char *data)
 			{
 				res=stradd(res,json_reader_get_string_value(reader));
 				res=stradd(res,"\r\n");
-				json_reader_end_member(reader);
+				//json_reader_end_member(reader);
 			}
-			else
+		/*	else
 			{
 				json_reader_end_member(reader);
 				json_reader_read_member(reader,"basic");
-			}
+			}*/
 
+			json_reader_end_member(reader);
 			json_reader_read_member(reader,"explains");
 			count=json_reader_count_elements(reader);
 
