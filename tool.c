@@ -4,25 +4,11 @@ char *string_add(const char *format,...)
 {
 	va_list arg_ptr;
 	int len;
-	char *res;
-	int pipefd[2];
+	char *res=NULL;
+	static char empty='\0';
 
 	va_start(arg_ptr,format);
-#ifdef _WIN32
-	if(_pipe(pipefd) == -1)
-		return NULL;
-	if(_dup2(pipefd[1],STDOUT_FILENO) == -1)
-		return NULL;
-	len=vprintf(format,arg_ptr);
-	_dup2(STDOUT_FILENO,pipefd[1]);
-#else
-	if(pipe(pipefd) == -1)
-		return NULL;
-	len=vdprintf(pipefd[1],format,arg_ptr);
-#endif
-	close(pipefd[0]);
-	close(pipefd[1]);
-
+	len=vsnprintf(&empty,0,format,arg_ptr);
 	va_end(arg_ptr);
 
 	if(len < 0)
@@ -31,9 +17,9 @@ char *string_add(const char *format,...)
 	res=malloc(len+1);
 	if(res == NULL)
 		return NULL;
+
 	va_start(arg_ptr,format);
 	vsnprintf(res,len+1,format,arg_ptr);
-
 	va_end(arg_ptr);
 
 	return res;
